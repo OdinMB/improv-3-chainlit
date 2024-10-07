@@ -57,13 +57,16 @@ class EventHandler(AsyncAssistantEventHandler):
         await self.current_message.stream_token(delta.value)
 
     async def on_text_done(self, text):
+        print(text)
         if hasattr(text, 'annotations') and text.annotations:
             processed_text, sources = await self.process_annotations(text.value, text.annotations)
             if sources:
                 processed_text += "\n\nSources:\n" + "\n".join(sources)
-            await self.current_message.update(content=processed_text)
+            self.current_message.content = processed_text
+            await self.current_message.update()
         else:
-            await self.current_message.update(content=text.value)
+            self.current_message.content = text.value
+            await self.current_message.update()
         
         # Ensure the message is marked as complete
         await self.current_message.send()
